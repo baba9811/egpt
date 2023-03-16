@@ -11,17 +11,21 @@ tokenizer.pad_token = tokenizer.eos_token
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
 
 # 데이터셋 가공
+contexts = data['context'].tolist()
+responses = data['response'].tolist()
+scores = data['score'].tolist()
+
+# 모든 입력 텐서의 크기를 동일하게 맞춤
+max_len = max(len(tokenizer.encode(context)) + len(tokenizer.encode(response)) for context, response in zip(contexts, responses))
 input_ids = []
 attention_masks = []
 labels = []
-for idx, row in data.iterrows():
-    context = str(row["context"])
-    response = str(row["response"])
+for context, response, score in zip(contexts, responses, scores):
     input_text = "[CLS]" + context + "[SEP]" + response + "[SEP]"
-    input_tokenized = tokenizer.encode_plus(input_text, max_length=1024, padding='longest', return_tensors='pt')
+    input_tokenized = tokenizer.encode_plus(input_text, max_length=max_len, padding='max_length', return_tensors='pt')
     input_ids.append(input_tokenized['input_ids'])
     attention_masks.append(input_tokenized['attention_mask'])
-    labels.append(torch.tensor(int(row["score"])))
+    labels.append(torch.tensor(int(score)))
 
 input_ids = torch.cat(input_ids, dim=0)
 attention_masks = torch.cat(attention_masks, dim=0)
