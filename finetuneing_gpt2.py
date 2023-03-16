@@ -6,7 +6,7 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer, DataCollatorForLanguage
 df = pd.read_csv('data.csv', encoding='cp949')
 
 # Load tokenizer
-tokenizer = GPT2Tokenizer.from_pretrained('distilgpt2', pad_token='<pad>')
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2-small', pad_token='<pad>')
 
 # Preprocess data
 inputs = []
@@ -29,7 +29,7 @@ max_seq_length = 512
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, pad_to_multiple_of=batch_size)
 
 # Load model
-model = GPT2LMHeadModel.from_pretrained('distilgpt2')
+model = GPT2LMHeadModel.from_pretrained('gpt2-small')
 
 # Create Trainer
 training_args = TrainingArguments(
