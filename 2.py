@@ -6,7 +6,7 @@ import torch
 data = pd.read_csv("data.csv", encoding='cp949')
 
 # 토크나이저 및 모델 로드
-tokenizer = GPT2Tokenizer.from_pretrained("skt/kogpt2-base-v2", cache_dir="local_cache")
+tokenizer = GPT2Tokenizer.from_pretrained("skt/kogpt2-base-v2", eos_token='</s>')
 
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
 
