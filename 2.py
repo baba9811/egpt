@@ -7,25 +7,20 @@ data = pd.read_csv("data.csv", encoding='cp949')
 
 # 토크나이저 및 모델 로드
 tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2", eos_token='</s>')
-tokenizer.pad_token = tokenizer.eos_token
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
 
 # 데이터셋 가공
-contexts = data['context'].tolist()
-responses = data['response'].tolist()
-scores = data['score'].tolist()
-
-# 모든 입력 텐서의 크기를 동일하게 맞춤
-max_len = max(len(tokenizer.encode(context) + tokenizer.encode(response)) for context, response in zip(contexts, responses))
 input_ids = []
 attention_masks = []
 labels = []
-for context, response, score in zip(contexts, responses, scores):
+for idx, row in data.iterrows():
+    context = str(row["context"])
+    response = str(row["response"])
     input_text = "[CLS]" + context + "[SEP]" + response + "[SEP]"
-    input_tokenized = tokenizer.encode_plus(input_text, max_length=max_len, padding='max_length', return_tensors='pt')
+    input_tokenized = tokenizer.encode_plus(input_text, max_length=1024, padding='longest', return_tensors='pt')
     input_ids.append(input_tokenized['input_ids'])
     attention_masks.append(input_tokenized['attention_mask'])
-    labels.append(torch.tensor(int(score)))
+    labels.append(torch.tensor(int(row["score"])))
 
 input_ids = torch.cat(input_ids, dim=0)
 attention_masks = torch.cat(attention_masks, dim=0)
