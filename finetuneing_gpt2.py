@@ -24,7 +24,7 @@ input_ids = tokenizer.batch_encode_plus(inputs, padding=True, return_tensors='pt
 labels = torch.tensor(labels, dtype=torch.float32)
 
 # Create data collator
-batch_size = 2
+batch_size = 1
 max_seq_length = 128
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, pad_to_multiple_of=batch_size)
 
