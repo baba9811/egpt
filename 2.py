@@ -19,12 +19,12 @@ for idx, row in data.iterrows():
     context = str(row["context"])
     response = str(row["response"])
     input_text = "[CLS]" + context + "[SEP]" + response + "[SEP]"
-    input_tokenized = tokenizer.encode_plus(input_text, max_length=1024, padding='longest', return_tensors='pt')
+    input_tokenized = tokenizer.encode_plus(input_text, max_length=1024, padding='max_length', return_tensors='pt')
     input_ids.append(input_tokenized['input_ids'])
     attention_masks.append(input_tokenized['attention_mask'])
     labels.append(torch.tensor(int(row["score"])))
 
-input_tokenized = tokenizer.encode_plus(input_text, max_length=1024, padding='longest', return_tensors='pt')
+input_tokenized = tokenizer.encode_plus(input_text, max_length=1024, padding='max_length', return_tensors='pt')
 input_ids = torch.cat(input_ids, dim=0)
 attention_masks = torch.cat(attention_masks, dim=0)
 labels = torch.stack(labels)
