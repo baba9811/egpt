@@ -1,12 +1,12 @@
 import pandas as pd
-from transformers import GPT2Tokenizer, GPT2LMHeadModel, PreTrainedTokenizerFast
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
 import torch
 
 # 데이터셋 로드
 data = pd.read_csv("data.csv", encoding='cp949')
 
 # 토크나이저 및 모델 로드
-tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2", eos_token='</s>')
+tokenizer = GPT2Tokenizer.from_pretrained("skt/kogpt2-base-v2", eos_token='</s>')
 tokenizer.pad_token = tokenizer.eos_token
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
 
