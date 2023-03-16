@@ -5,6 +5,7 @@ from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from torch.utils.data import Dataset, DataLoader
 
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2-medium')
+tokenizer.pad_token = tokenizer.eos_token
 model = GPT2LMHeadModel.from_pretrained('gpt2-medium')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
