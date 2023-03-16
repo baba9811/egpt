@@ -48,7 +48,8 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,          # whether or not to load the best model found during training at the end
     metric_for_best_model='eval_loss',    # metric to use to evaluate the best model
     greater_is_better=False,              # whether the `metric_for_best_model` should be maximized or not
-    report_to='tensorboard'
+    report_to='tensorboard',
+    gradient_accumulation_steps=2,
 )
 trainer = Trainer(
     model=model, 
