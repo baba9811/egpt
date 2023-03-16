@@ -1,7 +1,7 @@
 import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
-from transformers import GPT2Tokenizer, GPT2LMHeadModel
+from transformers import GPT2Tokenizer, GPT2LMHeadModel, PreTrainedTokenizerFast
 
 # 데이터셋 로드
 class MyDataset(Dataset):
@@ -34,8 +34,11 @@ class MyDataset(Dataset):
         }
 
 data = pd.read_csv("data.csv", encoding='cp949')
-tokenizer = GPT2Tokenizer.from_pretrained("skt/kogpt2-base-v2")
-tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
+                                                    bos_token='</s>',
+                                                    eos_token='</s>',
+                                                    pad_token='<pad>')
+
 dataset = MyDataset(data, tokenizer)
 dataloader = DataLoader(dataset, batch_size=16, shuffle=True)
 
