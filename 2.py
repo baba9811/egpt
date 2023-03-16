@@ -9,7 +9,7 @@ data = pd.read_csv("data.csv", encoding='cp949')
 tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2", eos_token='</s>')
 tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
-input_tokenized = tokenizer.encode_plus(input_text, max_length=1024, padding='longest', return_tensors='pt')
+
 
 # 데이터셋 가공
 input_ids = []
@@ -24,6 +24,7 @@ for idx, row in data.iterrows():
     attention_masks.append(input_tokenized['attention_mask'])
     labels.append(torch.tensor(int(row["score"])))
 
+input_tokenized = tokenizer.encode_plus(input_text, max_length=1024, padding='longest', return_tensors='pt')
 input_ids = torch.cat(input_ids, dim=0)
 attention_masks = torch.cat(attention_masks, dim=0)
 labels = torch.stack(labels)
