@@ -26,7 +26,7 @@ labels = torch.tensor(labels, dtype=torch.float32)
 # Create data collator
 batch_size = 2
 max_seq_length = 128
-data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, pad_to_multiple_of=batch_size, max_seq_length=max_seq_length)
+data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, pad_to_multiple_of=batch_size)
 
 # Load model
 model = GPT2LMHeadModel.from_pretrained('gpt2')
