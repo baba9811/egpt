@@ -5,7 +5,6 @@ from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from torch.utils.data import Dataset, DataLoader
 
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2-medium')
-tokenizer.pad_token = tokenizer.eos_token
 model = GPT2LMHeadModel.from_pretrained('gpt2-medium')
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -40,4 +39,25 @@ loss_fn = torch.nn.CrossEntropyLoss()
 def generate_response(input_text):
     input_ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
     max_length = len(input_text) + 50
-    output = model.generate(input_ids, max_length
+    output = model.generate(input_ids, max_length=max_length, pad_token_id=tokenizer.eos_token_id)
+    response = tokenizer.decode(output[0], skip_special_tokens=True)
+    return response
+
+for epoch in range(10):
+    epoch_loss = 0
+    model.train()
+    for input_ids, attention_mask, score in dataloader:
+        input_ids, attention_mask, score = input_ids.to(device), attention_mask.to(device), score.to(device)
+        labels = input_ids.clone().detach()
+        labels[labels == tokenizer.pad_token_id] = -100
+        outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+        loss = loss_fn(outputs.logits.view(-1, tokenizer.vocab_size), labels.view(-1))
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        epoch_loss += loss.item()
+    print('Epoch', epoch, 'loss:', epoch_loss / len(dataloader))
+
+input_text = "안녕하세요?"
+response = generate_response(input_text)
+print(response)
