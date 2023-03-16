@@ -6,7 +6,7 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer, DataCollatorForLanguage
 df = pd.read_csv('data.csv', encoding='cp949')
 
 # Load tokenizer
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2', pad_token='<pad>')
+tokenizer = GPT2Tokenizer.from_pretrained('distilgpt2', pad_token='<pad>')
 
 # Preprocess data
 inputs = []
@@ -29,7 +29,7 @@ max_seq_length = 128
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, pad_to_multiple_of=batch_size)
 
 # Load model
-model = GPT2LMHeadModel.from_pretrained('gpt2')
+model = GPT2LMHeadModel.from_pretrained('distilgpt2')
 
 # Create Trainer
 training_args = TrainingArguments(
@@ -49,7 +49,7 @@ training_args = TrainingArguments(
     metric_for_best_model='eval_loss',    # metric to use to evaluate the best model
     greater_is_better=False,              # whether the `metric_for_best_model` should be maximized or not
     report_to='tensorboard',
-    gradient_accumulation_steps=2,
+    gradient_accumulation_steps=1,
 )
 trainer = Trainer(
     model=model, 
