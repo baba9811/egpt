@@ -1,5 +1,5 @@
 import pandas as pd
-from transformers import GPT2Tokenizer, GPT2LMHeadModel
+from transformers import GPT2Tokenizer, GPT2LMHeadModel, PreTrainedTokenizerFast
 import torch
 
 # 데이터셋 로드
