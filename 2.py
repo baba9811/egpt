@@ -9,6 +9,7 @@ data = pd.read_csv("data.csv", encoding='cp949')
 tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2", eos_token='</s>')
 tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
+input_tokenized = tokenizer.encode_plus(input_text, max_length=1024, padding='longest', return_tensors='pt', padding=True)
 
 # 데이터셋 가공
 input_ids = []
