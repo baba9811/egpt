@@ -3,7 +3,7 @@ import torch
 from transformers import GPT2LMHeadModel, GPT2Tokenizer, DataCollatorForLanguageModeling, Trainer, TrainingArguments
 
 # Load data
-df = pd.read_csv('data.csv', encoding='cp949')
+df = pd.read_csv('data.csv')
 
 # Load tokenizer
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2', pad_token='<pad>')
@@ -12,8 +12,8 @@ tokenizer = GPT2Tokenizer.from_pretrained('gpt2', pad_token='<pad>')
 inputs = []
 labels = []
 for index, row in df.iterrows():
-    context = str(row['context'])  # Convert context to string
-    response = str(row['response'])  # Convert response to string
+    context = row['context']  # Convert context to string
+    response = row['response']  # Convert response to string
     input_text = context + tokenizer.eos_token + response
     label_text = row['score']  # Convert score to string
     inputs.append(input_text)
@@ -21,11 +21,12 @@ for index, row in df.iterrows():
 
 # Encode inputs and labels
 input_ids = tokenizer.batch_encode_plus(inputs, padding=True, return_tensors='pt')['input_ids']
-labels = torch.tensor(list(map(float, labels)))
+labels = torch.tensor(labels, dtype=torch.float32)
 
 # Create data collator
 batch_size = 2
-data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, pad_to_multiple_of=batch_size, pad_to_max_length=True)
+max_seq_length = 128
+data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, pad_to_multiple_of=batch_size, max_length=max_seq_length)
 
 # Load model
 model = GPT2LMHeadModel.from_pretrained('gpt2')
