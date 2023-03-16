@@ -1,13 +1,13 @@
 import pandas as pd
 import torch
-from transformers import GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, TextDataset, DataCollatorForLanguageModeling, Trainer, TrainingArguments
+from transformers import GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, TextDataset, DataCollatorForLanguageModeling,Trainer, TrainingArguments, PreTrainedTokenizerFast
 
 def load_dataset(file_name, encoding='cp949'):
     dataset = pd.read_csv(file_name, encoding=encoding)
     return dataset
 
 def train(dataset):
-    tokenizer = GPT2Tokenizer.from_pretrained('skt/kogpt2-base-v2')
+    tokenizer = PreTrainedTokenizerFast.from_pretrained('skt/kogpt2-base-v2')
     model = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2')
 
     dataset['input'] = dataset['context'] + ' ' + dataset['response']
