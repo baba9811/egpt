@@ -8,6 +8,14 @@ data = pd.read_csv("data.csv", encoding='cp949')
 # 토크나이저 및 모델 로드
 tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2", eos_token='</s>')
 tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+
+max_length = 1024
+if max_length > tokenizer.max_len_single_sentence:
+    max_length = tokenizer.max_len_single_sentence
+if max_length > tokenizer.model_max_length:
+    max_length = tokenizer.model_max_length
+tokenizer.model_max_length = max_length
+
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
 
 
