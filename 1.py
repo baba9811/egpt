@@ -15,6 +15,7 @@ class TextDataset(Dataset):
         self.data = pd.read_csv(data_path, encoding='cp949')
         self.tokenizer = tokenizer
         self.max_length = max_length
+        self.tokenizer.pad_token = self.tokenizer.eos_token
 
     def __len__(self):
         return len(self.data)
@@ -28,6 +29,7 @@ class TextDataset(Dataset):
         score = self.data.loc[idx, 'score']
         score = np.array(score, dtype=np.float32)
         return inputs['input_ids'], inputs['attention_mask'], score
+
 
 train_data_path = 'data.csv'
 dataset = TextDataset(train_data_path, tokenizer, max_length=1024)
