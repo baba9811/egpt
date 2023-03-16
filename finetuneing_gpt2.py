@@ -12,8 +12,8 @@ tokenizer = GPT2Tokenizer.from_pretrained('gpt2', pad_token='<pad>')
 inputs = []
 labels = []
 for index, row in df.iterrows():
-    context = row['context']  # Convert context to string
-    response = row['response']  # Convert response to string
+    context = str(row['context'])  # Convert context to string
+    response = str(row['response'])  # Convert response to string
     input_text = context + tokenizer.eos_token + response
     label_text = row['score']  # Convert score to string
     inputs.append(input_text)
