@@ -32,7 +32,7 @@ class TextDataset(Dataset):
 
 train_data_path = 'data.csv'
 dataset = TextDataset(train_data_path, tokenizer, max_length=1024)
-dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
 loss_fn = torch.nn.CrossEntropyLoss()
@@ -40,25 +40,4 @@ loss_fn = torch.nn.CrossEntropyLoss()
 def generate_response(input_text):
     input_ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
     max_length = len(input_text) + 50
-    output = model.generate(input_ids, max_length=max_length, pad_token_id=tokenizer.eos_token_id)
-    response = tokenizer.decode(output[0], skip_special_tokens=True)
-    return response
-
-for epoch in range(10):
-    epoch_loss = 0
-    model.train()
-    for input_ids, attention_mask, score in dataloader:
-        input_ids, attention_mask, score = input_ids.to(device), attention_mask.to(device), score.to(device)
-        labels = input_ids.clone().detach()
-        labels[labels == tokenizer.pad_token_id] = -100
-        outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
-        loss = loss_fn(outputs.logits.view(-1, tokenizer.vocab_size), labels.view(-1))
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        epoch_loss += loss.item()
-    print('Epoch', epoch, 'loss:', epoch_loss / len(dataloader))
-
-input_text = "안녕하세요?"
-response = generate_response(input_text)
-print(response)
+    output = model.generate(input_ids, max_length
