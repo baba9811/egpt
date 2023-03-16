@@ -15,7 +15,7 @@ for index, row in df.iterrows():
     context = str(row['context'])  # Convert context to string
     response = str(row['response'])  # Convert response to string
     input_text = context + tokenizer.eos_token + response
-    label_text = str(row['score'])  # Convert score to string
+    label_text = row['score']  # Convert score to string
     inputs.append(input_text)
     labels.append(label_text)
 
