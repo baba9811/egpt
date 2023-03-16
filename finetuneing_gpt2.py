@@ -24,7 +24,7 @@ input_ids = tokenizer.batch_encode_plus(inputs, padding=True, return_tensors='pt
 labels = torch.tensor(labels, dtype=torch.float32)
 
 # Create data collator
-batch_size = 16
+batch_size = 1
 max_seq_length = 512
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, pad_to_multiple_of=batch_size)
 
@@ -49,6 +49,7 @@ training_args = TrainingArguments(
     metric_for_best_model='eval_loss',    # metric to use to evaluate the best model
     greater_is_better=False,              # whether the `metric_for_best_model` should be maximized or not
     report_to='tensorboard',
+    gradient_accumulation_steps = 10000,
 )
 trainer = Trainer(
     model=model, 
