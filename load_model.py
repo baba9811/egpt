@@ -9,7 +9,7 @@ model = GPT2LMHeadModel.from_pretrained('./results')
 # Define input text
 input_text = input("enter the utterance:")
 
-tokenizer = GPT2Tokenizer
+tokenizer = GPT2Tokenizer()
 
 # Tokenize input text
 input_ids = tokenizer.encode(input_text, return_tensors='pt')
