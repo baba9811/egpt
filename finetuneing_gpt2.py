@@ -25,7 +25,7 @@ labels = torch.tensor(list(map(float, labels)))
 
 # Create data collator
 batch_size = 2
-data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, pad_to_multiple_of=batch_size, batch_size=batch_size)
+data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False, pad_to_multiple_of=batch_size, pad_to_max_length=True)
 
 # Load model
 model = GPT2LMHeadModel.from_pretrained('gpt2')
@@ -52,7 +52,7 @@ training_args = TrainingArguments(
 trainer = Trainer(
     model=model, 
     args=training_args, 
-    train_dataset=inputs, 
+    train_dataset=input_ids, 
     data_collator=data_collator
 )
 
