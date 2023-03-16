@@ -104,7 +104,7 @@ class MyDataset(Dataset):
         }
 
 data = pd.read_csv("data.csv", encoding='cp949')
-tokenizer = GPT2Tokenizer.from_pretrained("skt/kogpt2-base-v2", dir="skt/kogpt2-base-v2")
+tokenizer = GPT2Tokenizer.from_pretrained("skt/kogpt2-base-v2")
 
 tokenizer.add_special_tokens({'pad_token': '[PAD]'})
 dataset = MyDataset(data, tokenizer)
