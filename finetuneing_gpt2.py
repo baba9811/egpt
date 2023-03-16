@@ -3,7 +3,7 @@ import torch
 from transformers import GPT2LMHeadModel, GPT2Tokenizer, DataCollatorForLanguageModeling, Trainer, TrainingArguments
 
 # Load data
-df = pd.read_csv('data.csv')
+df = pd.read_csv('data.csv', encoding='cp949')
 
 # Load tokenizer
 tokenizer = GPT2Tokenizer.from_pretrained('gpt2', pad_token='<pad>')
