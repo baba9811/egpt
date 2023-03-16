@@ -15,8 +15,8 @@ input_ids = []
 attention_masks = []
 labels = []
 for idx, row in data.iterrows():
-    context = row["context"]
-    response = row["response"]
+    context = str(row["context"])
+    response = str(row["response"])
     input_text = "[CLS]" + context + "[SEP]" + response + "[SEP]"
     input_tokenized = tokenizer.encode_plus(input_text, max_length=1024, padding='longest', return_tensors='pt')
     input_ids.append(input_tokenized['input_ids'])
