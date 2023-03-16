@@ -33,7 +33,7 @@ class TextDataset(Dataset):
 
 train_data_path = 'data.csv'
 dataset = TextDataset(train_data_path, tokenizer, max_length=1024)
-dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
 loss_fn = torch.nn.CrossEntropyLoss()
