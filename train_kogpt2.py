@@ -1,46 +1,41 @@
-# train_kogpt2.py
 import pandas as pd
+import torch
 from transformers import GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, TextDataset, DataCollatorForLanguageModeling, Trainer, TrainingArguments
 
-def main():
-    data_file = "data.csv"
-    encoding = "cp949"
-    dataset = pd.read_csv(data_file, encoding=encoding)
-    dataset["combined"] = dataset.apply(lambda row: f"{row.context} [SEP] {row.response}", axis=1)
-    dataset["combined"].to_csv("train_data.txt", header=False, index=False)
+def load_dataset(file_name, encoding='cp949'):
+    dataset = pd.read_csv(file_name, encoding=encoding)
+    return dataset
 
-    model_name = "skt/kogpt2-base-v2"
-    tokenizer = GPT2Tokenizer.from_pretrained(model_name)
-    tokenizer.add_special_tokens({"additional_special_tokens": ["[SEP]"]})
+def train(dataset):
+    tokenizer = GPT2Tokenizer.from_pretrained('skt/kogpt2-base-v2')
+    model = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2')
 
-    config = GPT2Config.from_pretrained(model_name)
-    model = GPT2LMHeadModel.from_pretrained(model_name, config=config)
-    model.resize_token_embeddings(len(tokenizer))
+    dataset['input'] = dataset['context'] + ' ' + dataset['response']
+    texts = dataset['input'].tolist()
 
-    train_dataset = TextDataset(
-        tokenizer=tokenizer,
-        file_path="train_data.txt",
-        block_size=128,
-    )
-    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+    tokenized_texts = [tokenizer.encode(text) for text in texts]
+    dataset = TextDataset(tokenizer, tokenized_texts, block_size=128)
+    data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
     training_args = TrainingArguments(
-        output_dir="kogpt2_finetuned",
-        overwrite_output_dir=True,
+        output_dir='./results',
         num_train_epochs=3,
         per_device_train_batch_size=4,
-        save_steps=10_000,
+        logging_steps=100,
+        save_steps=1000,
         save_total_limit=2,
+        weight_decay=0.01,
     )
 
     trainer = Trainer(
         model=model,
         args=training_args,
         data_collator=data_collator,
-        train_dataset=train_dataset,
+        train_dataset=dataset,
     )
 
     trainer.train()
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    dataset = load_dataset('data.csv', 'cp949')
+    train(dataset)
