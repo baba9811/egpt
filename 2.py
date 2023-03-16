@@ -16,7 +16,7 @@ responses = data['response'].tolist()
 scores = data['score'].tolist()
 
 # 모든 입력 텐서의 크기를 동일하게 맞춤
-max_len = max(len(tokenizer.encode(context)) + len(tokenizer.encode(response)) for context, response in zip(contexts, responses))
+max_len = max(len(tokenizer.encode(context) + tokenizer.encode(response)) for context, response in zip(contexts, responses))
 input_ids = []
 attention_masks = []
 labels = []
