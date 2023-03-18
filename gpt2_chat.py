@@ -8,17 +8,6 @@ import urllib.request
 from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
 
-koGPT2_TOKENIZER = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
-
-                                                           bos_token=BOS, eos_token=EOS,
-                                                           unk_token="<unk>", pad_token=PAD,
-                                                           mask_token=MASK,
-                                                           )
-
-
-
-tokenizer = koGPT2_TOKENIZER
-model = GPT2LMHeadModel.from_pretrained("./kogpt2_fine_tuned")
 
 Q_TKN = "<usr>"
 A_TKN = "<sys>"
@@ -27,6 +16,17 @@ EOS = '</s>'
 MASK = '<unused0>'
 SENT = '<unused1>'
 PAD = '<pad>'
+
+koGPT2_TOKENIZER = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
+
+                                                           bos_token=BOS, eos_token=EOS,
+                                                           unk_token="<unk>", pad_token=PAD,
+                                                           mask_token=MASK,
+                                                           )
+
+tokenizer = koGPT2_TOKENIZER
+model = GPT2LMHeadModel.from_pretrained("./kogpt2_fine_tuned")
+
 
 with torch.no_grad():
     while 1:
