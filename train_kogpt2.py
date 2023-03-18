@@ -19,16 +19,23 @@ def prepare_dataset(data):
     for _, example in data.iterrows():
         context = str(example["context"])
         response = str(example["response"])
-        input_text = tokenizer(context, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
-        output_text = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
-        tokenized_examples.append({"input_text": input_text, "output_text": output_text})
+        input_ids = tokenizer(context, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
+        output_ids = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
+        # 예외 처리
+        if not input_ids:
+            continue
+        if not output_ids:
+            continue
+        tokenized_examples.append({"input_ids": input_ids, "output_ids": output_ids})
     return tokenized_examples
 
 # 학습 데이터셋 준비
 tokenized_examples = prepare_dataset(data)
-train_dataset = Dataset.from_dict({k: [dic[k] for dic in tokenized_examples] for k in tokenized_examples[0]})
-train_dataset = train_dataset.map(lambda x: {"input_text": x["input_text"][:127], "output_text": x["output_text"][:127]}, remove_columns=["input_text", "output_text"])
-train_dataset.set_format(type="torch", columns=["input_text", "output_text"])
+train_dataset = Dataset.from_dict({k: [dic[k] for dic in tokenized_examples] for k in tokenized_examples[0]}) if tokenized_examples else None
+if train_dataset is not None:
+    train_dataset = train_dataset.map(lambda x: {"input_ids": x["input_ids"][:127], "labels": x["output_ids"][:127]}, remove_columns=["output_ids"])
+    train_dataset.set_format(type="torch", columns=["input_ids", "labels"])
+
 
 # 학습 설정
 training_args = TrainingArguments(
