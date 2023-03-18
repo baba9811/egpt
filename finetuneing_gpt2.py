@@ -7,6 +7,7 @@ import torch
 import urllib.request
 from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizerFast
+from tqdm import tqdm
 
 data = pd.read_csv("data.csv", encoding='cp949')
 
@@ -20,14 +21,21 @@ koGPT2_TOKENIZER = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
                                                            unk_token="<unk>", pad_token=PAD,
                                                            mask_token=MASK,
                                                            )
+Q_TKN = "<usr>"
+A_TKN = "<sys>"
+BOS = '</s>'
+EOS = '</s>'
+MASK = '<unused0>'
+SENT = '<unused1>'
+PAD = '<pad>'
 
 class ChatbotDataset(Dataset):
     def __init__(self, chats, max_len=40):  # 데이터셋의 전처리를 해주는 부분
         self._data = chats
         self.max_len = max_len
-        self.q_token = "Q_TKN"
-        self.a_token = "A_TKN"
-        self.sent_token = "SENT"
+        self.q_token = Q_TKN
+        self.a_token = A_TKN
+        self.sent_token = SENT
         self.eos = EOS
         self.mask = MASK
         self.tokenizer = koGPT2_TOKENIZER
@@ -98,12 +106,58 @@ def collate_batch(batch):
 train_set = ChatbotDataset(data, max_len=40)
 
 #윈도우 환경에서 num_workers 는 무조건 0으로 지정, 리눅스에서는 2
+device = torch.device("cuda", if torch.cuda.is_available() else "cpu")
 train_dataloader = DataLoader(train_set, batch_size=32, num_workers=2, shuffle=True, collate_fn=collate_batch,)
 
-print("start")
-for batch_idx, samples in enumerate(train_dataloader):
-    token_ids, mask, label = samples
-    print("token_ids ====> ", token_ids)
-    print("mask =====> ", mask)
-    print("label =====> ", label)
-print("end")
+# print("start")
+# for batch_idx, samples in enumerate(train_dataloader):
+#     token_ids, mask, label = samples
+#     print("token_ids ====> ", token_ids)
+#     print("mask =====> ", mask)
+#     print("label =====> ", label)
+# print("end")
+
+model = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2')
+
+model.to(device)
+model.train()
+
+learning_rate = 3e-5
+criterion = torch.nn.CrossEntropyLoss(reduction="none")
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+epoch = 10
+Sneg = -1e18
+
+print ("start")
+for epoch in tqdm(range(epoch)):
+    for batch_idx, samples in enumerate(train_dataloader):
+        optimizer.zero_grad()
+        token_ids, mask, label = samples
+        out = model(token_ids)
+        out = out.logits      #Returns a new tensor with the logit of the elements of input
+        mask_3d = mask.unsqueeze(dim=2).repeat_interleave(repeats=out.shape[2], dim=2)
+        mask_out = torch.where(mask_3d == 1, out, Sneg * torch.ones_like(out))
+        loss = criterion(mask_out.transpose(2, 1), label)
+        # 평균 loss 만들기 avg_loss[0] / avg_loss[1] <- loss 정규화
+        avg_loss = loss.sum() / mask.sum()
+        avg_loss.backward()
+        # 학습 끝
+        optimizer.step()
+print ("end")
+
+with torch.no_grad():
+    while 1:
+        q = input("user > ").strip()
+        if q == "quit":
+            break
+        a = ""
+        while 1:
+            input_ids = torch.LongTensor(koGPT2_TOKENIZER.encode(Q_TKN + q + SENT + sent + A_TKN + a)).unsqueeze(dim=0)
+            pred = model(input_ids)
+            pred = pred.logits
+            gen = koGPT2_TOKENIZER.convert_ids_to_tokens(torch.argmax(pred, dim=-1).squeeze().numpy().tolist())[-1]
+            if gen == EOS:
+                break
+            a += gen.replace("▁", " ")
+        print("Chatbot > {}".format(a.strip()))
