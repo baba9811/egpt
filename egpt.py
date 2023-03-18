@@ -50,7 +50,7 @@ training_args = TrainingArguments(
     save_total_limit=2,
     prediction_loss_only=True,
 )
-model.resize_token_embeddings(len(tokenizer))
+
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -58,6 +58,7 @@ trainer = Trainer(
     data_collator=lambda data: {'input_ids': torch.stack([item[0] for item in data]),
                                 'labels': torch.stack([item[1] for item in data])},
 )
+
 
 # 모델 학습
 trainer.train()
