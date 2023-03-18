@@ -16,8 +16,8 @@ def prepare_dataset(data):
     input_texts = []
     output_texts = []
     for i, row in data.iterrows():
-        context = row['context']
-        response = row['response']
+        context = str(row['context'])
+        response = str(row['response'])
         input_texts.append(context)
         output_texts.append(response)
     return input_texts, output_texts
