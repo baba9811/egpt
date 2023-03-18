@@ -13,7 +13,11 @@ while True:
 
     # 사용자 입력 텍스트를 토큰화하고 모델에 전달
     input_tokens = tokenizer.encode(input_text, return_tensors="pt")
-    output = model.generate(input_tokens, max_length=50, num_return_sequences=1)
+    output = model.generate(input_tokens, max_length=50,
+                            num_return_sequences=1,
+                            temperature=0.7,
+                            do_sample=True,
+                            )
     print(output)
     # 생성된 토큰을 텍스트로 변환
     output_text = tokenizer.decode(output[0], skip_special_tokens=True)
