@@ -49,7 +49,7 @@ training_args = TrainingArguments(
     save_total_limit=2,
     prediction_loss_only=True,
 )
-
+model.resize_token_embeddings(len(tokenizer))
 trainer = Trainer(
     model=model,
     args=training_args,
