@@ -6,7 +6,7 @@ import re
 import torch
 import urllib.request
 from torch.utils.data import DataLoader, Dataset
-from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
+from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel, GPT2Config
 from tqdm import tqdm
 
 data = pd.read_csv("data.csv", encoding='cp949')
@@ -15,6 +15,8 @@ BOS = "</s>"
 EOS = "</s>"
 PAD = "<pad>"
 MASK = "<unused0>"
+
+config = GPT2Config.from_pretrained("skt/kogpt2-base-v2")
 
 koGPT2_TOKENIZER = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
 
@@ -120,7 +122,7 @@ train_dataloader = DataLoader(train_set, batch_size=32, num_workers=2, shuffle=T
 #     print("label =====> ", label)
 # print("end")
 
-model = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2')
+model = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2', config=config)
 
 # model.to(device)
 model.train()
