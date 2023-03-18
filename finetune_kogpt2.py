@@ -35,7 +35,7 @@ SENT = '<unused1>'
 PAD = '<pad>'
 
 class ChatbotDataset(Dataset):
-    def __init__(self, chats, max_len=40):  # 데이터셋의 전처리를 해주는 부분
+    def __init__(self, chats, max_len=80):  # 데이터셋의 전처리를 해주는 부분
         self._data = chats
         self.max_len = max_len
         self.q_token = Q_TKN

@@ -20,5 +20,5 @@ while True:
                             )
     
     # 생성된 토큰을 텍스트로 변환
-    output_text = tokenizer.decode(output[0], skip_special_tokens=True)
+    output_text = tokenizer.decode(output[0], skip_special_tokens=False)
     print(f"챗봇: {output_text}")
