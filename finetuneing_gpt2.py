@@ -106,7 +106,7 @@ def collate_batch(batch):
 train_set = ChatbotDataset(data, max_len=40)
 
 #윈도우 환경에서 num_workers 는 무조건 0으로 지정, 리눅스에서는 2
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 train_dataloader = DataLoader(train_set, batch_size=32, num_workers=2, shuffle=True, collate_fn=collate_batch,)
 
 # print("start")
@@ -119,7 +119,7 @@ train_dataloader = DataLoader(train_set, batch_size=32, num_workers=2, shuffle=T
 
 model = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2')
 
-model.to(device)
+# model.to(device)
 model.train()
 
 learning_rate = 3e-5
