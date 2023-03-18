@@ -149,6 +149,5 @@ for epoch in tqdm(range(epoch)):
         optimizer.step()
 print ("end")
 
-tokenizer.save_pretrained("./kogpt2_fine_tuned_2")
 model.save_pretrained("./kogpt2_fine_tuned_2")
 

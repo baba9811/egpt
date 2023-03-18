@@ -7,9 +7,17 @@ import torch
 import urllib.request
 from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
-from tqdm import tqdm
 
-tokenizer = PreTrainedTokenizerFast.from_pretrained("./kogpt2_fine_tuned")
+koGPT2_TOKENIZER = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
+
+                                                           bos_token=BOS, eos_token=EOS,
+                                                           unk_token="<unk>", pad_token=PAD,
+                                                           mask_token=MASK,
+                                                           )
+
+
+
+tokenizer = koGPT2_TOKENIZER
 model = GPT2LMHeadModel.from_pretrained("./kogpt2_fine_tuned")
 
 Q_TKN = "<usr>"
