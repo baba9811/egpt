@@ -9,8 +9,8 @@ df = pd.read_csv("data.csv", encoding="cp949")
 # Define tokenizer and tokenize dataset
 tokenizer = GPT2TokenizerFast.from_pretrained("taeminlee/kogpt2")
 tokenizer.add_special_tokens({'pad_token': '[PAD]'})
-train_encodings = tokenizer(df['context'].tolist(), truncation=True, padding=True)
-train_labels = tokenizer(df['response'].tolist(), truncation=True, padding=True)
+train_encodings = tokenizer(list(df['context']), truncation=True, padding=True)
+train_labels = tokenizer(list(df['response']), truncation=True, padding=True)
 
 # Convert dataset to PyTorch tensors
 class ChatbotDataset(torch.utils.data.Dataset):
