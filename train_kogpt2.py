@@ -42,7 +42,7 @@ if train_dataset is not None:
 training_args = TrainingArguments(
     output_dir="./kogpt2_fine_tuned",
     overwrite_output_dir=True,
-    num_train_epochs=3,
+    num_train_epochs=24,
     per_device_train_batch_size=4,
     save_steps=10_000,
     save_total_limit=2,
