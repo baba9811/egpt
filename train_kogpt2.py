@@ -1,7 +1,7 @@
 import pandas as pd
 from transformers import GPT2LMHeadModel, GPT2TokenizerFast, GPT2Config
 from transformers import Trainer, TrainingArguments
-from transformers import DataCollatorForSeq2Seq
+from transformers import DataCollatorForLanguageModeling
 from datasets import Dataset
 
 # 데이터셋 불러오기
@@ -19,8 +19,8 @@ def prepare_dataset(data):
     for i, row in data.iterrows():
         context = row['context']
         response = row['response']
-        input_text = tokenizer([context], return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
-        output_text = tokenizer([response], return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
+        input_text = tokenizer(context, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
+        output_text = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
         tokenized_examples.append({"input_text": input_text, "output_text": output_text})
     return tokenized_examples
 
@@ -44,9 +44,10 @@ training_args = TrainingArguments(
 trainer = Trainer(
     model=model,
     args=training_args,
-    data_collator=DataCollatorForSeq2Seq(
+    data_collator=DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
-        model=model,
+        pad_to_multiple_of=128,
+        pad_token_id=tokenizer.pad_token_id,
     ),
     train_dataset=train_dataset,
 )
