@@ -14,15 +14,17 @@ config = GPT2Config.from_pretrained("skt/kogpt2-base-v2")
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2", config=config)
 
 # 데이터셋 전처리
+# 데이터셋 전처리
 def prepare_dataset(data):
     tokenized_examples = []
     for i, row in data.iterrows():
         context = row['context']
         response = row['response']
-        input_text = tokenizer(context, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
-        output_text = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
+        input_text = tokenizer(str(context), return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
+        output_text = tokenizer(str(response), return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
         tokenized_examples.append({"input_text": input_text, "output_text": output_text})
     return tokenized_examples
+
 
 # 학습 데이터셋 준비
 tokenized_examples = prepare_dataset(data)
