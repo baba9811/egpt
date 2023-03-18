@@ -21,6 +21,12 @@ def prepare_dataset(data):
         dialogues.append(dialogue)
     return dialogues
 
+# train.txt 파일 생성
+train_dialogues = prepare_dataset(data)
+with open("train.txt", "w", encoding="utf-8") as f:
+    for dialogue in train_dialogues:
+        f.write(dialogue + "\n")
+
 # 학습 데이터셋 준비
 train_data = TextDataset(
     tokenizer=tokenizer,
