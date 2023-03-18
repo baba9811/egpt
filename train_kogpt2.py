@@ -1,41 +1,51 @@
 import pandas as pd
-import torch
-from transformers import GPT2LMHeadModel, GPT2Tokenizer, GPT2Config, TextDataset, DataCollatorForLanguageModeling,Trainer, TrainingArguments, PreTrainedTokenizerFast
+from transformers import GPT2LMHeadModel, GPT2TokenizerFast, GPT2Config, GPT2LMHeadModel
+from transformers import TextDataset, DataCollatorForLanguageModeling
+from transformers import Trainer, TrainingArguments
 
-def load_dataset(file_name, encoding='cp949'):
-    dataset = pd.read_csv(file_name, encoding=encoding)
-    return dataset
+# 데이터셋 불러오기
+data = pd.read_csv('data.csv', encoding='cp949')
 
-def train(dataset):
-    tokenizer = PreTrainedTokenizerFast.from_pretrained('skt/kogpt2-base-v2')
-    model = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2')
+# KoGPT2 토크나이저 및 모델 불러오기
+tokenizer = GPT2TokenizerFast.from_pretrained("skt/kogpt2-base-v2")
+model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
 
-    dataset['input'] = dataset['context'] + ' ' + dataset['response']
-    texts = dataset['input'].tolist()
+# 데이터셋 전처리
+def prepare_dataset(data):
+    dialogues = []
+    for i, row in data.iterrows():
+        context = row['context']
+        response = row['response']
+        score = row['score']
+        dialogue = f"{context}  {response}"
+        dialogues.append(dialogue)
+    return dialogues
 
-    tokenized_texts = [tokenizer.encode(text) for text in texts]
-    dataset = TextDataset(tokenizer, tokenized_texts, block_size=128)
-    data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
+# 학습 데이터셋 준비
+train_data = TextDataset(
+    tokenizer=tokenizer,
+    file_path="train.txt",
+    block_size=128,
+)
 
-    training_args = TrainingArguments(
-        output_dir='./results',
-        num_train_epochs=3,
-        per_device_train_batch_size=4,
-        logging_steps=100,
-        save_steps=1000,
-        save_total_limit=2,
-        weight_decay=0.01,
-    )
+# 학습 설정
+training_args = TrainingArguments(
+    output_dir="./kogpt2_fine_tuned",
+    overwrite_output_dir=True,
+    num_train_epochs=3,
+    per_device_train_batch_size=4,
+    save_steps=10_000,
+    save_total_limit=2,
+)
 
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        data_collator=data_collator,
-        train_dataset=dataset,
-    )
+# 학습
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    data_collator=DataCollatorForLanguageModeling(
+        tokenizer=tokenizer, mlm=False,
+    ),
+    train_dataset=train_data,
+)
 
-    trainer.train()
-
-if __name__ == '__main__':
-    dataset = load_dataset('data.csv', 'cp949')
-    train(dataset)
+trainer.train()

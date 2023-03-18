@@ -1,23 +1,20 @@
-import torch
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from transformers import GPT2LMHeadModel, GPT2TokenizerFast
 
-def generate_response(model, tokenizer, context, max_length=50):
-    input_ids = tokenizer.encode(context, return_tensors='pt')
-    output = model.generate(input_ids, max_length=max_length, num_return_sequences=1, no_repeat_ngram_size=2)
-    response = tokenizer.decode(output[0], skip_special_tokens=True)
-    return response
+# 모델 및 토크나이저 불러오기
+tokenizer = GPT2TokenizerFast.from_pretrained("./kogpt2_fine_tuned")
+model = GPT2LMHeadModel.from_pretrained("./kogpt2_fine_tuned")
 
-def main():
-    tokenizer = GPT2Tokenizer.from_pretrained('skt/kogpt2-base-v2')
-    model = GPT2LMHeadModel.from_pretrained('./results/checkpoint-last')
+# 대화 시작
+print("챗봇과 대화를 시작합니다. 'exit'를 입력하면 종료됩니다.")
+while True:
+    input_text = input("나: ")
+    if input_text.lower() == "exit":
+        break
 
-    print("대화를 시작합니다. 'exit'를 입력하면 대화를 종료합니다.")
-    while True:
-        context = input('User: ')
-        if context.lower() == 'exit':
-            break
-        response = generate_response(model, tokenizer, context)
-        print(f'Chatbot: {response}')
+    # 사용자 입력 텍스트를 토큰화하고 모델에 전달
+    input_tokens = tokenizer.encode(input_text, return_tensors="pt")
+    output = model.generate(input_tokens, max_length=50, num_return_sequences=1)
 
-if __name__ == '__main__':
-    main()
+    # 생성된 토큰을 텍스트로 변환
+    output_text = tokenizer.decode(output[0], skip_special_tokens=True)
+    print(f"챗봇: {output_text}")
