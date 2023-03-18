@@ -6,7 +6,7 @@ import re
 import torch
 import urllib.request
 from torch.utils.data import DataLoader, Dataset
-from transformers import PreTrainedTokenizerFast
+from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
 from tqdm import tqdm
 
 data = pd.read_csv("data.csv", encoding='cp949')
