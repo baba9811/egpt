@@ -13,7 +13,6 @@ tokenizer.pad_token = tokenizer.eos_token
 config = GPT2Config.from_pretrained("skt/kogpt2-base-v2")
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2", config=config)
 
-
 # 데이터셋 전처리
 def prepare_dataset(data):
     tokenized_examples = []
@@ -22,15 +21,9 @@ def prepare_dataset(data):
         response = str(example["response"])
         input_text = tokenizer(context, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
         output_text = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
-
         tokenized_examples.append({"input_text": input_text, "output_text": output_text})
     return tokenized_examples
 
-
-
-
-
-# 학습 데이터셋 준비
 # 학습 데이터셋 준비
 tokenized_examples = prepare_dataset(data)
 train_dataset = Dataset.from_dict({k: [dic[k] for dic in tokenized_examples] for k in tokenized_examples[0]})
@@ -58,7 +51,6 @@ trainer = Trainer(
     ),
     train_dataset=train_dataset,
 )
-
 
 trainer.train()
 
