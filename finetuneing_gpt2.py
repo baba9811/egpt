@@ -95,7 +95,7 @@ def collate_batch(batch):
     label = [item[2] for item in batch]
     return torch.LongTensor(data), torch.LongTensor(mask), torch.LongTensor(label)
 
-train_set = ChatbotDataset(Data, max_len=40)
+train_set = ChatbotDataset(data, max_len=40)
 
 #윈도우 환경에서 num_workers 는 무조건 0으로 지정, 리눅스에서는 2
 train_dataloader = DataLoader(train_set, batch_size=32, num_workers=2, shuffle=True, collate_fn=collate_batch,)
