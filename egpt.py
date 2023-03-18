@@ -1,88 +1,76 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
-from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel, Trainer, TrainingArguments
+from transformers import GPT2LMHeadModel, GPT2TokenizerFast, Trainer, TrainingArguments
 import pandas as pd
+import numpy as np
 
-# 데이터셋 불러오기
-df = pd.read_csv('data.csv', encoding='cp949')
+# Load dataset
+df = pd.read_csv("data.csv", encoding="cp949")
 
-# KoGPT2 tokenizer와 모델 불러오기
-tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2")
-model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
+# Define tokenizer and tokenize dataset
+tokenizer = GPT2TokenizerFast.from_pretrained("taeminlee/kogpt2")
+tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+train_encodings = tokenizer(df['context'].tolist(), truncation=True, padding=True)
+train_labels = tokenizer(df['response'].tolist(), truncation=True, padding=True)
 
+# Convert dataset to PyTorch tensors
+class ChatbotDataset(torch.utils.data.Dataset):
+    def __init__(self, encodings):
+        self.encodings = encodings
 
-# PyTorch Dataset 클래스 상속
-class MyDataset(Dataset):
-    def __init__(self, inputs, outputs):
-        self.inputs = inputs
-        self.outputs = outputs
+    def __getitem__(self, idx):
+        return {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
 
     def __len__(self):
-        return len(self.inputs)
+        return len(self.encodings.input_ids)
 
-    def __getitem__(self, index):
-        input_ids = torch.tensor(self.inputs[index])
-        output_ids = torch.tensor(self.outputs[index])
-        return input_ids, output_ids
+train_dataset = ChatbotDataset(train_encodings)
+eval_dataset = ChatbotDataset(train_encodings)
 
-# 입력 문장 tokenizing
-inputs = []
-
-for i in df['context']:
-    inputs.append(tokenizer.encode(str(i)))
-
-# 출력 문장 tokenizing
-outputs = []
-
-for i in df['response']:
-    outputs.append(tokenizer.encode("</s>" + str(i) + "</s>"))
-
-# PyTorch Dataset 클래스 객체 생성
-dataset = MyDataset(inputs, outputs)
-
-# DataLoader 정의
-dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
-
-# Trainer와 TrainingArguments 정의
+# Define training arguments
 training_args = TrainingArguments(
-    output_dir='./results',
-    num_train_epochs=5,
-    per_device_train_batch_size=4,
-    save_steps=5000,
-    save_total_limit=2,
-    prediction_loss_only=True,
+    output_dir='./results',  # output directory
+    num_train_epochs=5,  # total number of training epochs
+    per_device_train_batch_size=2,  # batch size per device during training
+    per_device_eval_batch_size=2,  # batch size for evaluation
+    warmup_steps=500,  # number of warmup steps for learning rate scheduler
+    weight_decay=0.01,  # strength of weight decay
+    logging_dir='./logs',  # directory for storing logs
+    logging_steps=100,  # log & save weights each logging_steps
+    load_best_model_at_end=True,  # load the best model when finished training
+    metric_for_best_model='eval_loss',
+    evaluation_strategy='steps',
+    save_total_limit=5,  # limit the total amount of checkpoints to save
 )
 
+# Define trainer
+model = GPT2LMHeadModel.from_pretrained("taeminlee/kogpt2")
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=dataloader,
-    data_collator=lambda data: {'input_ids': torch.stack([item[0] for item in data]),
-                                'labels': torch.stack([item[1] for item in data])},
+    train_dataset=train_dataset,
+    eval_dataset=eval_dataset,
+    data_collator=lambda data: {'input_ids': torch.stack([f['input_ids'] for f in data]),
+                                'attention_mask': torch.stack([f['attention_mask'] for f in data]),
+                                'labels': torch.stack([f['input_ids'] for f in data])},
 )
 
-# 모델 학습
+# Train model
 trainer.train()
 
+# Save model
+model.save_pretrained('chatbot_model')
 
+# Load model
+model = GPT2LMHeadModel.from_pretrained('chatbot_model')
+tokenizer = GPT2TokenizerFast.from_pretrained('taeminlee/kogpt2')
 
-# 파인튜닝한 모델과 tokenizer 불러오기
-tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2")
-model = GPT2LMHeadModel.from_pretrained("results/checkpoint-5000")
-
+# Start chatbot conversation
 while True:
-    # 사용자 입력 받기
-    user_input = input("User: ")
-
-    # 'exit' 입력 시 프로그램 종료
+    user_input = input("나: ")
     if user_input == 'exit':
+        print("챗봇과의 대화를 종료합니다.")
         break
-
-    # 모델 입력을 위해 tokenizer 사용
     input_ids = tokenizer.encode(user_input, return_tensors='pt')
-
-    # 모델에 입력하여 출력 생성
-    output = model.generate(input_ids, max_length=100, do_sample=True)
-
-    # 출력을 텍스트 형태로 변환하여 출력
-    print("Chatbot:", tokenizer.decode(output[0], skip_special_tokens=True))
+    bot_output = model.generate(input_ids=input_ids, max_length=1000, pad_token_id=tokenizer.pad_token_id, do_sample=True, top_k=50, top_p=0.95)
+    bot_response = tokenizer.decode(bot_output[0], skip_special_tokens=True)
+    print("챗봇:", bot_response)
