@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel, GPT2Config
 from tqdm import tqdm
 
-data = pd.read_csv("data.csv", encoding='cp949')
+data = pd.read_csv("train_data.csv", encoding='cp949')
 
 BOS = "</s>"
 EOS = "</s>"
