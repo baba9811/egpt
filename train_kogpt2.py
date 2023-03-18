@@ -19,8 +19,8 @@ def prepare_dataset(data):
     for i, row in data.iterrows():
         context = row['context']
         response = row['response']
-        input_text = tokenizer(context, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids
-        output_text = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids
+        input_text = tokenizer([context], return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
+        output_text = tokenizer([response], return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
         tokenized_examples.append({"input_text": input_text, "output_text": output_text})
     return tokenized_examples
 
