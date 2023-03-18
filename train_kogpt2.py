@@ -50,10 +50,11 @@ trainer = Trainer(
     data_collator=DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
         pad_to_multiple_of=128,
-        pad_token_id=tokenizer.pad_token_id,
+        pad_token=tokenizer.pad_token,
     ),
     train_dataset=train_dataset,
 )
+
 
 trainer.train()
 
