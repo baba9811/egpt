@@ -14,13 +14,14 @@ model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
 inputs = []
 
 for i in df['context']:
-    inputs.append(tokenizer.encode(i))
+    inputs.append(tokenizer.encode(str(i)))
 
 # 출력 문장 tokenizing
 outputs = []
 
 for i in df['response']:
-    outputs.append(tokenizer.encode("[BOS] " + i + " [EOS]"))
+    outputs.append(tokenizer.encode("[BOS] " + str(i) + " [EOS]"))
+
 
 # PyTorch Dataset 클래스 상속
 class MyDataset(Dataset):
