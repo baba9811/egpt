@@ -35,7 +35,7 @@ SENT = '<unused1>'
 PAD = '<pad>'
 
 class ChatbotDataset(Dataset):
-    def __init__(self, chats, max_len=80):  # 데이터셋의 전처리를 해주는 부분
+    def __init__(self, chats, max_len=128):  # 데이터셋의 전처리를 해주는 부분
         self._data = chats
         self.max_len = max_len
         self.q_token = Q_TKN
@@ -108,7 +108,7 @@ def collate_batch(batch):
     label = [item[2] for item in batch]
     return torch.LongTensor(data), torch.LongTensor(mask), torch.LongTensor(label)
 
-train_set = ChatbotDataset(data, max_len=40)
+train_set = ChatbotDataset(data, max_len=128)
 
 #윈도우 환경에서 num_workers 는 무조건 0으로 지정, 리눅스에서는 2
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
