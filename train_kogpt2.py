@@ -14,6 +14,7 @@ config = GPT2Config.from_pretrained("skt/kogpt2-base-v2")
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2", config=config)
 
 model.resize_token_embeddings(len(tokenizer))
+
 # 데이터셋 전처리
 def prepare_dataset(data):
     tokenized_examples = []
