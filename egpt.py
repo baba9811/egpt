@@ -10,18 +10,6 @@ df = pd.read_csv('data.csv', encoding='cp949')
 tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2")
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2")
 
-# 입력 문장 tokenizing
-inputs = []
-
-for i in df['context']:
-    inputs.append(tokenizer.encode(str(i)))
-
-# 출력 문장 tokenizing
-outputs = []
-
-for i in df['response']:
-    outputs.append(tokenizer.encode("[BOS] " + str(i) + " [EOS]"))
-
 
 # PyTorch Dataset 클래스 상속
 class MyDataset(Dataset):
@@ -47,7 +35,7 @@ for i in df['context']:
 outputs = []
 
 for i in df['response']:
-    outputs.append(tokenizer.encode("[BOS] " + str(i) + " [EOS]"))
+    outputs.append(tokenizer.encode("</s>" + str(i) + "</s>"))
 
 # PyTorch Dataset 클래스 객체 생성
 dataset = MyDataset(inputs, outputs)
@@ -75,6 +63,7 @@ trainer = Trainer(
 
 # 모델 학습
 trainer.train()
+
 
 
 # 파인튜닝한 모델과 tokenizer 불러오기
