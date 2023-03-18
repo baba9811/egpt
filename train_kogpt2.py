@@ -22,7 +22,7 @@ def prepare_dataset(data):
         context = str(example["context"])
         response = str(example["response"])
         input_ids = tokenizer(context, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
-        output_ids = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).output_ids[0].tolist()
+        output_ids = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
         # 예외 처리
         if not input_ids:
             continue
@@ -43,7 +43,7 @@ if train_dataset is not None:
 training_args = TrainingArguments(
     output_dir="./kogpt2_fine_tuned",
     overwrite_output_dir=True,
-    num_train_epochs=24,
+    num_train_epochs=8,
     per_device_train_batch_size=4,
     save_steps=10_000,
     save_total_limit=2,
