@@ -55,3 +55,8 @@ trainer = Trainer(
 )
 
 trainer.train()
+
+ # 토크나이저와 모델 저장
+
+tokenizer.save_pretrained("./kogpt2_fine_tuned")
+model.save_pretrained("./kogpt2_fine_tuned")
