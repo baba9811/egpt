@@ -18,7 +18,7 @@ while True:
                             temperature=0.7,
                             do_sample=True,
                             )
-    print(output)
+    
     # 생성된 토큰을 텍스트로 변환
     output_text = tokenizer.decode(output[0], skip_special_tokens=True)
     print(f"챗봇: {output_text}")
