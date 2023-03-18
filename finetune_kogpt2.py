@@ -19,7 +19,6 @@ MASK = "<unused0>"
 config = GPT2Config.from_pretrained("skt/kogpt2-base-v2")
 
 koGPT2_TOKENIZER = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
-
                                                            bos_token=BOS, eos_token=EOS,
                                                            unk_token="<unk>", pad_token=PAD,
                                                            mask_token=MASK,
@@ -43,7 +42,7 @@ class ChatbotDataset(Dataset):
         self.sent_token = SENT
         self.eos = EOS
         self.mask = MASK
-        self.tokenizer = koGPT2_TOKENIZER
+        self.tokenizer = tokenizer
 
     def __len__(self):  # chatbotdata 의 길이를 리턴한다.
         return len(self._data)
@@ -103,9 +102,9 @@ class ChatbotDataset(Dataset):
         return (token_ids, np.array(mask), labels_ids)
     
 def collate_batch(batch):
-    data = [item[0] for item in batch]
-    mask = [item[1] for item in batch]
-    label = [item[2] for item in batch]
+    data = np.array(item[0] for item in batch)
+    mask = np.array(item[1] for item in batch)
+    label = np.array(item[2] for item in batch)
     return torch.LongTensor(data), torch.LongTensor(mask), torch.LongTensor(label)
 
 train_set = ChatbotDataset(data, max_len=128)
