@@ -18,13 +18,14 @@ model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2", config=config)
 def prepare_dataset(data):
     tokenized_examples = []
     for _, example in data.iterrows():
-        context = example["context"]
-        response = example["response"]
+        context = str(example["context"])
+        response = str(example["response"])
         input_text = tokenizer(context, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
         output_text = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
 
         tokenized_examples.append({"input_text": input_text, "output_text": output_text})
     return tokenized_examples
+
 
 
 
