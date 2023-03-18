@@ -22,7 +22,7 @@ def prepare_dataset(data):
         context = str(example["context"])
         response = str(example["response"])
         input_ids = tokenizer(context, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
-        output_ids = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).input_ids[0].tolist()
+        output_ids = tokenizer(response, return_tensors="pt", padding='max_length', truncation=True, max_length=128).output_ids[0].tolist()
         # 예외 처리
         if not input_ids:
             continue
