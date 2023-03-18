@@ -8,8 +8,8 @@ from datasets import Dataset
 data = pd.read_csv('data.csv', encoding='cp949')
 
 # KoGPT2 토크나이저 및 모델 불러오기
-tokenizer = GPT2TokenizerFast.from_pretrained("skt/kogpt2-base-v2")
-tokenizer.pad_token = tokenizer.eos_token
+tokenizer = GPT2TokenizerFast.from_pretrained('skt/kogpt2-base-v2', bos_token='</s>', eos_token='</s>', unk_token='<unk>', pad_token='<pad>', mask_token='<mask>')
+# tokenizer.pad_token = tokenizer.eos_token
 config = GPT2Config.from_pretrained("skt/kogpt2-base-v2")
 model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2", config=config)
 
