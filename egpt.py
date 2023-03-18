@@ -37,8 +37,22 @@ class MyDataset(Dataset):
         output_ids = torch.tensor(self.outputs[index])
         return input_ids, output_ids
 
-# DataLoader 정의
+# 입력 문장 tokenizing
+inputs = []
+
+for i in df['context']:
+    inputs.append(tokenizer.encode(str(i)))
+
+# 출력 문장 tokenizing
+outputs = []
+
+for i in df['response']:
+    outputs.append(tokenizer.encode("[BOS] " + str(i) + " [EOS]"))
+
+# PyTorch Dataset 클래스 객체 생성
 dataset = MyDataset(inputs, outputs)
+
+# DataLoader 정의
 dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
 
 # Trainer와 TrainingArguments 정의
@@ -59,9 +73,9 @@ trainer = Trainer(
                                 'labels': torch.stack([item[1] for item in data])},
 )
 
-
 # 모델 학습
 trainer.train()
+
 
 # 파인튜닝한 모델과 tokenizer 불러오기
 tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2")
