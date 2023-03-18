@@ -1,8 +1,7 @@
 import pandas as pd
-from transformers import GPT2LMHeadModel, GPT2TokenizerFast, GPT2Config, GPT2LMHeadModel
+from transformers import GPT2LMHeadModel, GPT2TokenizerFast, GPT2Config
 from transformers import Trainer, TrainingArguments
 from transformers import DataCollatorForSeq2Seq
-from transformers import T2TModel
 from datasets import Dataset
 
 # 데이터셋 불러오기
@@ -11,28 +10,24 @@ data = pd.read_csv('data.csv', encoding='cp949')
 # KoGPT2 토크나이저 및 모델 불러오기
 tokenizer = GPT2TokenizerFast.from_pretrained("skt/kogpt2-base-v2")
 config = GPT2Config.from_pretrained("skt/kogpt2-base-v2")
-model = T2TModel.from_pretrained("skt/kogpt2-base-v2", config=config)
+model = GPT2LMHeadModel.from_pretrained("skt/kogpt2-base-v2", config=config)
 
 # 데이터셋 전처리
 def prepare_dataset(data):
-    input_texts = []
-    output_texts = []
+    tokenized_examples = []
     for i, row in data.iterrows():
         context = row['context']
         response = row['response']
-        input_texts.append(context)
-        output_texts.append(response)
-    return input_texts, output_texts
-
-# train.txt 파일 생성
-train_input_texts, train_output_texts = prepare_dataset(data)
+        input_text = tokenizer.encode(context)
+        output_text = tokenizer.encode(response)
+        tokenized_examples.append({"input_text": input_text, "output_text": output_text})
+    return tokenized_examples
 
 # 학습 데이터셋 준비
-train_dataset = Dataset.from_dict({
-    'input_text': train_input_texts,
-    'output_text': train_output_texts,
-})
-train_dataset = train_dataset.map(lambda x: tokenizer(x['input_text'], x['output_text'], padding='max_length', truncation=True, max_length=128), batched=True)
+tokenized_examples = prepare_dataset(data)
+train_dataset = Dataset.from_dict(tokenized_examples)
+train_dataset = train_dataset.map(lambda x: {"input_text": x["input_text"][:127], "output_text": x["output_text"][:127]}, remove_columns=["input_text", "output_text"])
+train_dataset.set_format(type="torch", columns=["input_text", "output_text"])
 
 # 학습 설정
 training_args = TrainingArguments(
