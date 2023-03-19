@@ -5,7 +5,7 @@ from transformers import DataCollatorForLanguageModeling
 from datasets import Dataset
 
 # 데이터셋 불러오기
-data = pd.read_csv('data.csv', encoding='cp949')
+data = pd.read_csv('./data.csv', encoding='cp949')
 
 # KoGPT2 토크나이저 및 모델 불러오기
 tokenizer = GPT2TokenizerFast.from_pretrained('skt/kogpt2-base-v2', bos_token='</s>', eos_token='</s>', unk_token='<unk>', pad_token='<pad>', mask_token='<mask>')

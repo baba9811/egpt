@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel, GPT2Config
 from tqdm import tqdm
 
-data = pd.read_csv("train_data.csv", encoding='cp949')
+data = pd.read_csv("./data/train_data.csv", encoding='cp949')
 
 BOS = "</s>"
 EOS = "</s>"
@@ -111,7 +111,7 @@ train_set = ChatbotDataset(data, max_len=128)
 
 #윈도우 환경에서 num_workers 는 무조건 0으로 지정, 리눅스에서는 2
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-train_dataloader = DataLoader(train_set, batch_size=32, num_workers=2, shuffle=True, collate_fn=collate_batch,)
+train_dataloader = DataLoader(train_set, batch_size=64, num_workers=2, shuffle=True, collate_fn=collate_batch,)
 
 # print("start")
 # for batch_idx, samples in enumerate(train_dataloader):
@@ -134,7 +134,7 @@ epoch = 10
 Sneg = -1e18
 
 print ("start")
-for epoch in tqdm(range(epoch)):
+for epoch in range(epoch):
     for batch_idx, samples in tqdm(enumerate(train_dataloader)):
         optimizer.zero_grad()
         token_ids, mask, label = samples
