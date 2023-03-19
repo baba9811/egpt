@@ -134,7 +134,7 @@ epoch = 10
 Sneg = -1e18
 
 print ("start")
-for epoch in range(epoch):
+for epoch in tqdm(range(epoch)):
     for batch_idx, samples in tqdm(enumerate(train_dataloader)):
         optimizer.zero_grad()
         token_ids, mask, label = samples
