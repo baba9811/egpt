@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel, GPT2Config
 from tqdm import tqdm
 
-data = pd.read_csv("./data/train_data.csv", encoding='cp949')
+data = pd.read_csv("./data/data.csv", encoding='cp949')
 
 BOS = "</s>"
 EOS = "</s>"
@@ -123,7 +123,7 @@ train_dataloader = DataLoader(train_set, batch_size=16, num_workers=4, shuffle=T
 #     print("label =====> ", label)
 # print("end")
 
-model = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2',
+model = GPT2LMHeadModel.from_pretrained('kakaobrain/kogpt',
                                         revision='KoGPT6B-ryan1.5b-float16',
                                         config=config,
                                         )
