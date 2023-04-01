@@ -1,0 +1,5 @@
+-f https://download.pytorch.org/whl/torch_stable.html
+pandas
+transformers
+numpy
+torch==1.12.1+cu113

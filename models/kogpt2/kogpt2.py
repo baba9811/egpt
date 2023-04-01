@@ -9,31 +9,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel, GPT2Config
 from tqdm import tqdm
 
-data = pd.read_csv("./data/data.csv", encoding='cp949')
 
-BOS = "</s>"
-EOS = "</s>"
-PAD = "<pad>"
-MASK = "<unused0>"
-
-config = GPT2Config.from_pretrained("kakaobrain/kogpt",
-                                    revision='KoGPT6B-ryan1.5b-float16',)
-
-koGPT2_TOKENIZER = PreTrainedTokenizerFast.from_pretrained("kakaobrain/kogpt",
-                                                           revision='KoGPT6B-ryan1.5b-float16',
-                                                           bos_token=BOS, eos_token=EOS,
-                                                           unk_token="<unk>", pad_token=PAD,
-                                                           mask_token=MASK,
-                                                           )
-
-tokenizer = koGPT2_TOKENIZER
-Q_TKN = "<usr>"
-A_TKN = "<sys>"
-BOS = '</s>'
-EOS = '</s>'
-MASK = '<unused0>'
-SENT = '<unused1>'
-PAD = '<pad>'
 
 class ChatbotDataset(Dataset):
     def __init__(self, chats, max_len=128):  # 데이터셋의 전처리를 해주는 부분
@@ -109,11 +85,11 @@ def collate_batch(batch):
     label = np.array([item[2] for item in batch])
     return torch.LongTensor(data), torch.LongTensor(mask), torch.LongTensor(label)
 
-train_set = ChatbotDataset(data, max_len=128)
 
-#윈도우 환경에서 num_workers 는 무조건 0으로 지정, 리눅스에서는 2
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-train_dataloader = DataLoader(train_set, batch_size=16, num_workers=4, shuffle=True, collate_fn=collate_batch,)
+
+
+
+
 
 # print("start")
 # for batch_idx, samples in enumerate(train_dataloader):
@@ -122,38 +98,67 @@ train_dataloader = DataLoader(train_set, batch_size=16, num_workers=4, shuffle=T
 #     print("mask =====> ", mask)
 #     print("label =====> ", label)
 # print("end")
+if __name__ == '__main__':
+    data = pd.read_csv("../../data/train_data2.csv", encoding='cp949')
 
-model = GPT2LMHeadModel.from_pretrained('kakaobrain/kogpt',
-                                        revision='KoGPT6B-ryan1.5b-float16',
-                                        config=config,
-                                        )
+    BOS = "</s>"
+    EOS = "</s>"
+    PAD = "<pad>"
+    MASK = "<unused0>"
 
-# model.to(device)
-model.train()
+    config = GPT2Config.from_pretrained("skt/kogpt2-base-v2")
 
-learning_rate = 3e-5
-criterion = torch.nn.CrossEntropyLoss(reduction="none")
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    koGPT2_TOKENIZER = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
+                                                            bos_token=BOS, eos_token=EOS,
+                                                            unk_token="<unk>", pad_token=PAD,
+                                                            mask_token=MASK,
+                                                            )
 
-epoch = 10
-Sneg = -1e18
+    tokenizer = koGPT2_TOKENIZER
+    Q_TKN = "<usr>"
+    A_TKN = "<sys>"
+    BOS = '</s>'
+    EOS = '</s>'
+    MASK = '<unused0>'
+    SENT = '<unused1>'
+    PAD = '<pad>'
 
-print ("start")
-for epoch in tqdm(range(epoch)):
-    for batch_idx, samples in tqdm(enumerate(train_dataloader)):
-        optimizer.zero_grad()
-        token_ids, mask, label = samples
-        out = model(token_ids)
-        out = out.logits      #Returns a new tensor with the logit of the elements of input
-        mask_3d = mask.unsqueeze(dim=2).repeat_interleave(repeats=out.shape[2], dim=2)
-        mask_out = torch.where(mask_3d == 1, out, Sneg * torch.ones_like(out))
-        loss = criterion(mask_out.transpose(2, 1), label)
-        # 평균 loss 만들기 avg_loss[0] / avg_loss[1] <- loss 정규화
-        avg_loss = loss.sum() / mask.sum()
-        avg_loss.backward()
-        # 학습 끝
-        optimizer.step()
-print ("end")
+    train_set = ChatbotDataset(data, max_len=128)
+    #윈도우 환경에서 num_workers 는 무조건 0으로 지정, 리눅스에서는 2
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    train_dataloader = DataLoader(train_set, batch_size=32, num_workers=0, shuffle=True, collate_fn=collate_batch,)
+    ##
 
-model.save_pretrained("./kakao_kogpt2_fine_tuned")
+    model = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2', config=config)
+    model.to(device)
+    model.train()
+
+    learning_rate = 3e-5
+    criterion = torch.nn.CrossEntropyLoss(reduction="none")
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+    epoch = 10
+    Sneg = -1e18
+
+    print ("start")
+    for epoch in tqdm(range(epoch)):
+        for batch_idx, samples in tqdm(enumerate(train_dataloader)):
+            optimizer.zero_grad()
+            token_ids, mask, label = samples
+            token_ids = token_ids.to(device)
+            mask = mask.to(device)
+            label = label.to(device)
+            out = model(token_ids)
+            out = out.logits      #Returns a new tensor with the logit of the elements of input
+            mask_3d = mask.unsqueeze(dim=2).repeat_interleave(repeats=out.shape[2], dim=2)
+            mask_out = torch.where(mask_3d == 1, out, Sneg * torch.ones_like(out))
+            loss = criterion(mask_out.transpose(2, 1), label)
+            # 평균 loss 만들기 avg_loss[0] / avg_loss[1] <- loss 정규화
+            avg_loss = loss.sum() / mask.sum()
+            avg_loss.backward()
+            # 학습 끝
+            optimizer.step()
+    print ("end")
+
+    model.save_pretrained("../../finetuned_models/kogpt2")
 

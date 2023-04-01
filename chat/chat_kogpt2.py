@@ -25,7 +25,7 @@ koGPT2_TOKENIZER = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
                                                            )
 
 tokenizer = koGPT2_TOKENIZER
-model = GPT2LMHeadModel.from_pretrained("./kogpt2_fine_tuned_2")
+model = GPT2LMHeadModel.from_pretrained("../finetuned_models/kogpt2")
 
 
 with torch.no_grad():

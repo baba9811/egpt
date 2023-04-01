@@ -17,16 +17,15 @@ MASK = '<unused0>'
 SENT = '<unused1>'
 PAD = '<pad>'
 
-koGPT2_TOKENIZER = PreTrainedTokenizerFast.from_pretrained(
-                                                           "kakaobrain/kogpt",
-                                                           revision='KoGPT6B-ryan1.5b-float16'
-                                                           bos_token=BOS, eos_token=EOS,
-                                                           unk_token="<unk>", pad_token=PAD,
-                                                           mask_token=MASK,
-                                                           )
+koGPT_TOKENIZER = PreTrainedTokenizerFast.from_pretrained("kakaobrain/kogpt",
+                                                            revision='KoGPT6B-ryan1.5b-float16',
+                                                            bos_token=BOS, eos_token=EOS,
+                                                            unk_token="<unk>", pad_token=PAD,
+                                                            mask_token=MASK,
+                                                            )
 
-tokenizer = koGPT2_TOKENIZER
-model = GPT2LMHeadModel.from_pretrained("./kakao_kogpt2_fine_tuned")
+tokenizer = koGPT_TOKENIZER
+model = GPT2LMHeadModel.from_pretrained("../finetuned_models/kakao_gpt")
 
 
 with torch.no_grad():
