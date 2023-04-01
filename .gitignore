@@ -1,2 +1,3 @@
 # ignore finetuned models
-finetuned_models/
+finetuned_models/kogpt2/
+finetuned_models/kakao_gpt/
